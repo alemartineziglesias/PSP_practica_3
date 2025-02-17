@@ -22,6 +22,7 @@ public class Cliente extends JFrame implements ActionListener
 	DataInputStream fentrada;
 	DataOutputStream fsalida;
 	String nombre;
+	int numeroServidor;
 	static JTextField mensaje = new JTextField();
 	private JScrollPane scrollpane;
 	static JTextArea textarea;
@@ -31,7 +32,6 @@ public class Cliente extends JFrame implements ActionListener
 	public Cliente(Socket socket, String nombre)
 	{
 		// Prepara la pantalla. Se recibe el socket creado y el nombre del cliente
-		super(" Conexión del cliente chat: " + nombre);
 		setLayout(null);
 		mensaje.setBounds(10, 10, 400, 30);
 		add(mensaje);
@@ -59,6 +59,7 @@ public class Cliente extends JFrame implements ActionListener
 		{
 			fentrada = new DataInputStream(socket.getInputStream());
 			fsalida = new DataOutputStream(socket.getOutputStream());
+			numeroServidor = fentrada.readInt();
 			String texto = "SERVIDOR> " + nombre + " ha entrado al chat";
 			fsalida.writeUTF(texto);
 		}
@@ -75,9 +76,8 @@ public class Cliente extends JFrame implements ActionListener
 		    {
 		        try 
 		        {
-		            // Enviar mensaje de desconexión al servidor
 		            fsalida.writeUTF("SERVIDOR> " + nombre + " ha abandonado el chat");
-		            fsalida.writeUTF("*"); // Indicador de cierre
+		            fsalida.writeUTF("*");
 		            repetir = false;
 		        } 
 		        catch (IOException ex) 
@@ -116,6 +116,16 @@ public class Cliente extends JFrame implements ActionListener
 		try
 		{
 			socket = new Socket("127.0.0.1", puerto);
+			DataOutputStream fsalida = new DataOutputStream(socket.getOutputStream());
+			fsalida.writeUTF(nombre);
+			DataInputStream fentrada = new DataInputStream(socket.getInputStream());
+			String respuesta = fentrada.readUTF();
+			if (respuesta.startsWith("ERROR:")) 
+			{
+			    JOptionPane.showMessageDialog(null, respuesta, "Error", JOptionPane.ERROR_MESSAGE);
+			    socket.close();
+			    System.exit(0);
+			}
 		}
 		catch (IOException ex)
 		{
@@ -148,12 +158,12 @@ public class Cliente extends JFrame implements ActionListener
 			try
 			{
 				int apuesta = Integer.parseInt(mensaje.getText());
-				if (apuesta < Servidor.numero)
+				if (apuesta < numeroServidor)
 				{
 					String texto = nombre + " elige el " + apuesta + ", pero el número es mayor";
 					fsalida.writeUTF(texto);
 				}
-				else if (apuesta > Servidor.numero)
+				else if (apuesta > numeroServidor)
 				{
 					String texto = nombre + " elige el " + apuesta + ", pero el número es menor";
 					fsalida.writeUTF(texto);
