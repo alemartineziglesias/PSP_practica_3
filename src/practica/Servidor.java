@@ -2,7 +2,6 @@ package practica;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.BindException;
@@ -32,7 +31,6 @@ public class Servidor extends JFrame implements ActionListener
     static JTextArea textarea;
     JButton salir = new JButton("Salir");
     static List<Socket> tabla = new ArrayList<Socket>();
-    static List<String> nombres = new ArrayList<String>();
 
     public Servidor()
     {
@@ -54,72 +52,48 @@ public class Servidor extends JFrame implements ActionListener
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-    public static void main(String args[]) throws Exception {
-        try 
-        {
-            numero = (int) (Math.random() * 100) + 1;
-            servidor = new ServerSocket(PUERTO);
+    public static void main(String args[]) throws Exception
+    {
+    	try
+    	{
+    		numero = (int) (Math.random() * 100) + 1;
+    		servidor = new ServerSocket(PUERTO);
             System.out.println("Servidor iniciado...");
             Servidor pantalla = new Servidor();
             pantalla.setBounds(0, 0, 540, 450);
             pantalla.setVisible(true);
             mensaje.setText("Número de conexiones actuales: " + 0);
-            
-            while (!servidor.isClosed()) 
+            while (!servidor.isClosed())
             {
                 Socket socket;
-                String nombre;
-                
-                try 
+                try
                 {
                     socket = servidor.accept();
-                    DataInputStream fentrada = new DataInputStream(socket.getInputStream());
-                    
-                    nombre = fentrada.readUTF();  // Leemos el nombre enviado por el cliente
-                    
-                    // Verificar si el nombre ya está en uso
-                    synchronized (nombres) 
-                    {
-                        if (nombres.contains(nombre)) 
-                        {
-                            DataOutputStream fsalida = new DataOutputStream(socket.getOutputStream());
-                            fsalida.writeUTF("ERROR: El nombre ya está en uso. Conexión rechazada.");
-                            socket.close();
-                            continue;
-                        } 
-                        else 
-                        {
-                            nombres.add(nombre);  // Agregamos el nombre a la lista
-                        }
-                    }
-                } 
-                catch (SocketException sex) 
+                }
+                catch (SocketException sex)
                 {
                     break;
                 }
-
-                tabla.add(socket);  // Se agrega el socket a la lista de clientes
+                tabla.add(socket);
                 CONEXIONES++;
                 ACTUALES++;
                 mensaje.setText("Número de conexiones actuales: " + ACTUALES);
                 DataOutputStream salida = new DataOutputStream(socket.getOutputStream());
-                salida.writeInt(numero);  // Envía el número al cliente
-                
-                // Aquí pasamos tanto el socket como el nombre al hilo
-                HiloServidor hilo = new HiloServidor(socket, nombre);
+                salida.writeInt(numero); // Envía el número al cliente
+                HiloServidor hilo = new HiloServidor(socket);
                 hilo.start();
             }
 
-            if (servidor.isClosed()) 
+            if (servidor.isClosed())
             {
-                System.out.println("Servidor finalizado...");
+            	System.out.println("Servidor finalizado...");
             }
-        } 
-        catch (BindException be)
-        {
-            JOptionPane.showMessageDialog(null, "El servidor ya está activo", "Error", JOptionPane.ERROR_MESSAGE);
-            System.exit(0);
-        }
+    	}
+    	catch (BindException be)
+    	{
+    		JOptionPane.showMessageDialog(null, "El servidor ya está activo", "Error", JOptionPane.ERROR_MESSAGE);
+    		System.exit(0);
+    	}
     }
 
     public void actionPerformed(ActionEvent e)

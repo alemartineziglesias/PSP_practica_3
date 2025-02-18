@@ -31,7 +31,6 @@ public class Cliente extends JFrame implements ActionListener
 	boolean repetir = true;
 	public Cliente(Socket socket, String nombre)
 	{
-		// Prepara la pantalla. Se recibe el socket creado y el nombre del cliente
 		setLayout(null);
 		mensaje.setBounds(10, 10, 400, 30);
 		add(mensaje);
@@ -50,11 +49,6 @@ public class Cliente extends JFrame implements ActionListener
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.socket = socket;
 		this.nombre = nombre;
-		//Se crean los flujos de entrada y salida.
-		//En el flujo de salida se escribe un mensaje
-		//indicando que el cliente se ha unido al Chat.
-		//El HiloServidor recibe este mensaje y
-		//lo reenvía a todos los clientes conectados
 		try
 		{
 			fentrada = new DataInputStream(socket.getInputStream());
@@ -99,33 +93,14 @@ public class Cliente extends JFrame implements ActionListener
 		    }
 		});
 	}
-	//El método main es el que lanza el cliente,
-	//para ello en primer lugar se solicita el nombre o nick del
-	//cliente, una vez especificado el nombre
-	//se crea la conexión al servidor y se crear la pantalla del Chat(ClientChat)
-	//lanzando su ejecución (ejecutar()).
 	public static void main(String[] args) throws Exception
 	{
 		int puerto = 44444;
 		String nombre = JOptionPane.showInputDialog("Introduce tu nombre:");
-		if(nombre == null)
-		{
-			System.exit(0);
-		}
 		Socket socket = null;
 		try
 		{
 			socket = new Socket("127.0.0.1", puerto);
-			DataOutputStream fsalida = new DataOutputStream(socket.getOutputStream());
-			fsalida.writeUTF(nombre);
-			DataInputStream fentrada = new DataInputStream(socket.getInputStream());
-			String respuesta = fentrada.readUTF();
-			if (respuesta.startsWith("ERROR:")) 
-			{
-			    JOptionPane.showMessageDialog(null, respuesta, "Error", JOptionPane.ERROR_MESSAGE);
-			    socket.close();
-			    System.exit(0);
-			}
 		}
 		catch (IOException ex)
 		{
@@ -149,8 +124,7 @@ public class Cliente extends JFrame implements ActionListener
 			System.exit(0);
 		}
 	}
-	// Cuando se pulsa el botón Enviar,
-	// el mensaje introducido se envía al servidor por el flujo de salida
+
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == boton)

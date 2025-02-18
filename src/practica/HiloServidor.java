@@ -10,13 +10,11 @@ public class HiloServidor extends Thread
 {
 	DataInputStream fentrada;
 	Socket socket;
-	String nombre;
 	boolean fin = false;
 
-	public HiloServidor(Socket socket, String nombre)
+	public HiloServidor(Socket socket)
 	{
 		this.socket = socket;
-		this.nombre = nombre;
 		try
 		{
 			fentrada = new DataInputStream(socket.getInputStream());
@@ -30,7 +28,6 @@ public class HiloServidor extends Thread
 
 	public void run()
 	{
-		//Envía el contenido del textArea al método EnviarMensajes
 		Servidor.mensaje.setText("Número de conexiones actuales: " + Servidor.ACTUALES);
 		String texto = Servidor.textarea.getText();
 		EnviarMensajes(texto);
@@ -75,10 +72,6 @@ public class HiloServidor extends Thread
 			catch (EOFException eof)
 			{
 				fin = true;
-				synchronized (Servidor.nombres) 
-				{
-				    Servidor.nombres.remove(nombre);
-				}
 				Servidor.ACTUALES--;
 				Servidor.mensaje.setText("Número de conexiones actuales: " + Servidor.ACTUALES);
 				Servidor.tabla.remove(socket);
@@ -94,10 +87,6 @@ public class HiloServidor extends Thread
 			catch (Exception ex)
 			{
 				fin = true;
-				synchronized (Servidor.nombres) 
-				{
-				    Servidor.nombres.remove(nombre);
-				}
 				Servidor.tabla.remove(socket);
 				try 
 				{
